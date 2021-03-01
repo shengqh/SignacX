@@ -1,0 +1,8 @@
+exportPattern("^[[:alpha:]]+")
+importFrom("Matrix", "t")
+importFrom("stats", "na.omit", "phyper", "sd")
+importFrom("utils", "data", "read.csv", "read.delim", "read.table",
+               "write.table", "combn")
+importFrom("methods", "new", "as")
+importFrom("stats", "anova", "as.formula", "binomial", "model.matrix", "cov")
+importFrom("utils", "download.file")

@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Mathew Chamberlain" />
+
+<meta name="date" content="2021-02-26" />
+
+<title>Benchmarking SignacX and SingleR with synovial flow cytometry data</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Benchmarking SignacX and SingleR with synovial flow cytometry data</h1>
+<h4 class="author">Mathew Chamberlain</h4>
+<h4 class="date">2021-02-26</h4>
+
+
+
+<p>This vignette shows how to use Signac to annotate flow-sorted synovial cells by integrating SignacX with Seurat. We also compared Signac to another popular cell type annotation tool, SingleR. We start with raw counts.</p>
+<div id="load-data" class="section level2">
+<h2>Load data</h2>
+<p>Read the CEL-seq2 data.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>ReadCelseq &lt;-<span class="st"> </span><span class="cf">function</span>(counts.file, meta.file) {</span>
+<span id="cb1-2"><a href="#cb1-2"></a>    E =<span class="st"> </span><span class="kw">suppressWarnings</span>(readr<span class="op">::</span><span class="kw">read_tsv</span>(counts.file))</span>
+<span id="cb1-3"><a href="#cb1-3"></a>    gns &lt;-<span class="st"> </span>E<span class="op">$</span>gene</span>
+<span id="cb1-4"><a href="#cb1-4"></a>    E =<span class="st"> </span>E[, <span class="dv">-1</span>]</span>
+<span id="cb1-5"><a href="#cb1-5"></a>    E =<span class="st"> </span>Matrix<span class="op">::</span><span class="kw">Matrix</span>(<span class="kw">as.matrix</span>(E), <span class="dt">sparse =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb1-6"><a href="#cb1-6"></a>    <span class="kw">rownames</span>(E) &lt;-<span class="st"> </span>gns</span>
+<span id="cb1-7"><a href="#cb1-7"></a>    E</span>
+<span id="cb1-8"><a href="#cb1-8"></a>}</span>
+<span id="cb1-9"><a href="#cb1-9"></a></span>
+<span id="cb1-10"><a href="#cb1-10"></a>counts.file =<span class="st"> &quot;./fls/celseq_matrix_ru10_molecules.tsv.gz&quot;</span></span>
+<span id="cb1-11"><a href="#cb1-11"></a>meta.file =<span class="st"> &quot;./fls/celseq_meta.immport.723957.tsv&quot;</span></span>
+<span id="cb1-12"><a href="#cb1-12"></a></span>
+<span id="cb1-13"><a href="#cb1-13"></a>E =<span class="st"> </span><span class="kw">ReadCelseq</span>(<span class="dt">counts.file =</span> counts.file, <span class="dt">meta.file =</span> meta.file)</span>
+<span id="cb1-14"><a href="#cb1-14"></a>M =<span class="st"> </span><span class="kw">suppressWarnings</span>(readr<span class="op">::</span><span class="kw">read_tsv</span>(meta.file))</span>
+<span id="cb1-15"><a href="#cb1-15"></a></span>
+<span id="cb1-16"><a href="#cb1-16"></a><span class="co"># filter data based on depth and number of genes detected</span></span>
+<span id="cb1-17"><a href="#cb1-17"></a>kmu =<span class="st"> </span>Matrix<span class="op">::</span><span class="kw">colSums</span>(E <span class="op">!=</span><span class="st"> </span><span class="dv">0</span>)</span>
+<span id="cb1-18"><a href="#cb1-18"></a>kmu2 =<span class="st"> </span>Matrix<span class="op">::</span><span class="kw">colSums</span>(E)</span>
+<span id="cb1-19"><a href="#cb1-19"></a>E =<span class="st"> </span>E[, kmu <span class="op">&gt;</span><span class="st"> </span><span class="dv">200</span> <span class="op">&amp;</span><span class="st"> </span>kmu2 <span class="op">&gt;</span><span class="st"> </span><span class="dv">500</span>]</span>
+<span id="cb1-20"><a href="#cb1-20"></a></span>
+<span id="cb1-21"><a href="#cb1-21"></a><span class="co"># filter by mitochondrial percentage</span></span>
+<span id="cb1-22"><a href="#cb1-22"></a>logik =<span class="st"> </span><span class="kw">grepl</span>(<span class="st">&quot;^MT-&quot;</span>, <span class="kw">rownames</span>(E))</span>
+<span id="cb1-23"><a href="#cb1-23"></a>MitoFrac =<span class="st"> </span>Matrix<span class="op">::</span><span class="kw">colSums</span>(E[logik, ])<span class="op">/</span>Matrix<span class="op">::</span><span class="kw">colSums</span>(E) <span class="op">*</span><span class="st"> </span><span class="dv">100</span></span>
+<span id="cb1-24"><a href="#cb1-24"></a>E =<span class="st"> </span>E[, MitoFrac <span class="op">&lt;</span><span class="st"> </span><span class="dv">20</span>]</span></code></pre></div>
+</div>
+<div id="singler" class="section level2">
+<h2>SingleR</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">require</span>(SingleR)</span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="kw">data</span>(<span class="st">&quot;hpca&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3"></a>Q =<span class="st"> </span><span class="kw">SingleR</span>(<span class="dt">sc_data =</span> E, <span class="dt">ref_data =</span> hpca<span class="op">$</span>data, <span class="dt">types =</span> hpca<span class="op">$</span>main_types, <span class="dt">fine.tune =</span> F, <span class="dt">numCores =</span> <span class="dv">4</span>)</span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="kw">save</span>(<span class="dt">file =</span> <span class="st">&quot;fls/SingleR_Results.rda&quot;</span>, Q)</span>
+<span id="cb2-5"><a href="#cb2-5"></a>True_labels =<span class="st"> </span>M<span class="op">$</span>type[<span class="kw">match</span>(<span class="kw">colnames</span>(E), M<span class="op">$</span>cell_name)]</span>
+<span id="cb2-6"><a href="#cb2-6"></a><span class="kw">saveRDS</span>(True_labels, <span class="dt">file =</span> <span class="st">&quot;fls/celltypes_amp_synovium_true.rds&quot;</span>)</span></code></pre></div>
+</div>
+<div id="seurat" class="section level2">
+<h2>Seurat</h2>
+<p>Start with the standard pre-processing steps for a Seurat object.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">library</span>(Seurat)</span></code></pre></div>
+<p>Create a Seurat object, and then perform SCTransform normalization. Note:</p>
+<ul>
+<li>You can use the legacy functions here (i.e., NormalizeData, ScaleData, etc.), use SCTransform or any other normalization method (including no normalization). We did not notice a significant difference in cell type annotations with different normalization methods.</li>
+<li>We think that it is best practice to use SCTransform, but it is not a necessary step. Signac will work fine without it.</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># load data</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>synovium &lt;-<span class="st"> </span><span class="kw">CreateSeuratObject</span>(<span class="dt">counts =</span> E, <span class="dt">project =</span> <span class="st">&quot;FACs&quot;</span>)</span>
+<span id="cb4-3"><a href="#cb4-3"></a></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="co"># run sctransform</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a>synovium &lt;-<span class="st"> </span><span class="kw">SCTransform</span>(synovium, <span class="dt">verbose =</span> F)</span></code></pre></div>
+<p>Perform dimensionality reduction by PCA and UMAP embedding. Note:</p>
+<ul>
+<li>Signac actually needs these functions since it uses the nearest neighbor graph generated by Seurat.</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># These are now standard steps in the Seurat workflow for visualization and clustering</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>synovium &lt;-<span class="st"> </span><span class="kw">RunPCA</span>(synovium, <span class="dt">verbose =</span> <span class="ot">FALSE</span>)</span>
+<span id="cb5-3"><a href="#cb5-3"></a>synovium &lt;-<span class="st"> </span><span class="kw">RunUMAP</span>(synovium, <span class="dt">dims =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">30</span>, <span class="dt">verbose =</span> <span class="ot">FALSE</span>)</span>
+<span id="cb5-4"><a href="#cb5-4"></a>synovium &lt;-<span class="st"> </span><span class="kw">FindNeighbors</span>(synovium, <span class="dt">dims =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">30</span>, <span class="dt">verbose =</span> <span class="ot">FALSE</span>)</span></code></pre></div>
+</div>
+<div id="signacx" class="section level2">
+<h2>SignacX</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">library</span>(SignacX)</span></code></pre></div>
+<p>Generate Signac labels for the Seurat object. Note:</p>
+<ul>
+<li>Optionally, you can do parallel computing by setting num.cores &gt; 1 in the Signac function.</li>
+<li>Run time is ~10 minutes for &lt;100,000 cells.</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># Run Signac</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a>labels &lt;-<span class="st"> </span><span class="kw">Signac</span>(synovium, <span class="dt">num.cores =</span> <span class="dv">4</span>)</span>
+<span id="cb7-3"><a href="#cb7-3"></a>celltypes =<span class="st"> </span><span class="kw">GenerateLabels</span>(labels, <span class="dt">E =</span> synovium)</span></code></pre></div>
+</div>
+<div id="compare-signacx-and-singler-with-facs-labels" class="section level2">
+<h2>Compare SignacX and SingleR with FACs labels</h2>
+<p>SignacX (rows are FACs labels, columns are SignacX)</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+B
+</th>
+<th style="text-align:right;">
+F
+</th>
+<th style="text-align:right;">
+M
+</th>
+<th style="text-align:right;">
+NonImmune
+</th>
+<th style="text-align:right;">
+T
+</th>
+<th style="text-align:right;">
+Unclassified
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+B
+</td>
+<td style="text-align:right;">
+945
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+19
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2218
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+223
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+58
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+28
+</td>
+<td style="text-align:right;">
+891
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+96
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1768
+</td>
+<td style="text-align:right;">
+21
+</td>
+</tr>
+</tbody>
+</table>
+<p>SingleR (rows are FACs labels, columns are SingleR)</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+B
+</th>
+<th style="text-align:right;">
+Chondr.
+</th>
+<th style="text-align:right;">
+F
+</th>
+<th style="text-align:right;">
+M
+</th>
+<th style="text-align:right;">
+NK
+</th>
+<th style="text-align:right;">
+NonImmune
+</th>
+<th style="text-align:right;">
+T
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+B
+</td>
+<td style="text-align:right;">
+958
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1468
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+23
+</td>
+<td style="text-align:right;">
+960
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+964
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+368
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1414
+</td>
+</tr>
+</tbody>
+</table>
+<p>Note:</p>
+<ul>
+<li>These data were flow-sorted for CD3, and therefore lack NK cells. Signac detected no NK cells.</li>
+<li>F = Fibroblasts; M = monocytes; T = T cells; B = B cells</li>
+<li>Note that SingleR inaccurately annotated the majority of fibroblast cells as chondrocytes (Chondr.) and non immune cells, and also significantly identified NK cells (even though the data were flow-sorted for CD3, and thus lacked NK cells).</li>
+</ul>
+<p>Signac accuracy</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>logik =<span class="st"> </span>xy <span class="op">!=</span><span class="st"> &quot;Unclassified&quot;</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a>Signac_Accuracy =<span class="st"> </span><span class="kw">round</span>(<span class="kw">sum</span>(xy[logik] <span class="op">==</span><span class="st"> </span>True_labels[logik])<span class="op">/</span><span class="kw">sum</span>(logik) <span class="op">*</span><span class="st"> </span><span class="dv">100</span>, <span class="dv">2</span>)</span>
+<span id="cb8-3"><a href="#cb8-3"></a>Signac_Accuracy</span></code></pre></div>
+<pre><code>## [1] 95.32</code></pre>
+<p>SingleR accuracy</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>SingleR_Accuracy =<span class="st"> </span><span class="kw">round</span>(<span class="kw">sum</span>(xx <span class="op">==</span><span class="st"> </span>True_labels)<span class="op">/</span><span class="kw">sum</span>(logik) <span class="op">*</span><span class="st"> </span><span class="dv">100</span>, <span class="dv">2</span>)</span>
+<span id="cb10-2"><a href="#cb10-2"></a>SingleR_Accuracy</span></code></pre></div>
+<pre><code>## [1] 55.21</code></pre>
+<p>Save results</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="kw">saveRDS</span>(synovium, <span class="dt">file =</span> <span class="st">&quot;synovium_signac.rds&quot;</span>)</span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="kw">saveRDS</span>(celltypes, <span class="dt">file =</span> <span class="st">&quot;synovium_signac_celltypes.rds&quot;</span>)</span></code></pre></div>
+<details>
+<p><summary><strong>Session Info</strong></summary></p>
+<pre><code>## R version 3.5.0 (2018-04-23)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: CentOS Linux 7 (Core)
+## 
+## Matrix products: default
+## BLAS/LAPACK: /site/ne/home/i0369218/.local/share/r-miniconda/envs/r-reticulate/lib/libopenblasp-r0.3.10.so
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=C              
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## loaded via a namespace (and not attached):
+##  [1] compiler_3.5.0  magrittr_1.5    formatR_1.7     htmltools_0.4.0
+##  [5] tools_3.5.0     yaml_2.2.1      Rcpp_1.0.4.6    stringi_1.4.6  
+##  [9] rmarkdown_2.1   highr_0.8       knitr_1.28      stringr_1.4.0  
+## [13] digest_0.6.18   xfun_0.12       rlang_0.4.8     evaluate_0.14</code></pre>
+</details>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

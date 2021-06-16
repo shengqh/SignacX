@@ -14,7 +14,8 @@ SignacFast(
   impute = TRUE,
   verbose = TRUE,
   do.normalize = TRUE,
-  return.probability = FALSE
+  return.probability = FALSE,
+  graph.used = "nn"
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ SignacFast(
 \item{do.normalize}{if TRUE, cells are normalized to the mean library size. Default is TRUE.}
 
 \item{return.probability}{if TRUE, returns the probability associated with each cell type label. Default is TRUE.}
+
+\item{graph.used}{If using Seurat object by default, Signac uses the nearest neighbor graph in the graphs field of the Seurat object. Other options are "wnn" to use weighted nearest neighbors, as well as "snn" to use shared nearest neighbors.}
 }
 \value{
 A list of character vectors: cell type annotations (L1, L2, ...) at each level of the hierarchy

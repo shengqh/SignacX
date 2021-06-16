@@ -11,7 +11,8 @@ GenerateLabels(
   new_populations = NULL,
   new_categories = NULL,
   min.cells = 10,
-  spring.dir = NULL
+  spring.dir = NULL,
+  graph.used = "nn"
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ GenerateLabels(
 \item{min.cells}{If desired, any cell population with equal to or less than N cells is set to "Unclassified." Default is 10 cells.}
 
 \item{spring.dir}{If using SPRING, directory to categorical_coloring_data.json. Default is NULL.}
+
+\item{graph.used}{If using Seurat object by default, Signac uses the nearest neighbor graph in the graphs field of the Seurat object. Other options are "wnn" to use weighted nearest neighbors, as well as "snn" to use shared nearest neighbors.}
 }
 \value{
 A list of cell type labels for cell types, cell states and novel populations.
@@ -50,17 +53,10 @@ pbmc <- CreateSeuratObject(counts = E, project = "pbmc")
 # run Seurat pipeline
 pbmc <- SCTransform(pbmc, verbose = FALSE)
 pbmc <- RunPCA(pbmc, verbose = FALSE)
-pbmc <- RunUMAP(pbmc, dims = 1:30, verbose = FALSE)
 pbmc <- FindNeighbors(pbmc, dims = 1:30, verbose = FALSE)
 
-# download bootstrapped reference data for training models
-file.dir = "https://github.com/mathewchamberlain/Signac/blob/master/data/"
-file = "training_HPCA.rda"
-download.file(paste0(file.dir, file, "?raw=true"), destfile = "training_HPCA.rda")
-load("training_HPCA.rda")
-
 # classify cells
-labels = SignacFast(E = pbmc, R = training_HPCA)
+labels = SignacFast(E = pbmc)
 celltypes = GenerateLabels(labels, E = pbmc)
 }
 }

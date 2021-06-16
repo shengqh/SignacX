@@ -15,6 +15,7 @@
 #' @param num.cores number of cores to use for parallel computation. Default is 1. 
 #' @param return.probability if TRUE, returns the probability associated with each cell type label. Default is TRUE.
 #' @param spring.dir If using SPRING, directory to categorical_coloring_data.json. Default is NULL.
+#' @param graph.used If using Seurat object by default, Signac uses the nearest neighbor graph in the graphs field of the Seurat object. Other options are "wnn" to use weighted nearest neighbors, as well as "snn" to use shared nearest neighbors.
 #' @seealso \code{\link{Signac}} for another classification function.
 #' @return A list of character vectors: cell type annotations (L1, L2, ...) at each level of the hierarchy
 #' as well as 'clusters' for the Louvain clustering results.
@@ -51,7 +52,7 @@
 #' saveRDS(pbmc, "pbmcs.rds")
 #' saveRDS(celltypes, "celltypes.rds")
 #' }
-SignacFast <- function(E, Models = 'default', spring.dir = NULL, num.cores = 1, threshold = 0, smooth = TRUE, impute = TRUE, verbose = TRUE, do.normalize = TRUE, return.probability = FALSE)
+SignacFast <- function(E, Models = 'default', spring.dir = NULL, num.cores = 1, threshold = 0, smooth = TRUE, impute = TRUE, verbose = TRUE, do.normalize = TRUE, return.probability = FALSE, graph.used = "nn")
 {
   if (Models == 'default')
     Models = GetModels_HPCA()
@@ -60,7 +61,7 @@ SignacFast <- function(E, Models = 'default', spring.dir = NULL, num.cores = 1, 
   
   if (flag){
     default.assay <- Seurat::DefaultAssay(E)
-    edges = E@graphs[[which(grepl(paste0(default.assay, "_nn"), names(E@graphs)))]]
+    edges = E@graphs[[which(grepl(paste0("_", graph.used), names(E@graphs)))]]
   }
   
   if (verbose)

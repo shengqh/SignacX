@@ -20,6 +20,7 @@
 #' @param hidden Number of hidden layers in the neural network. Default is 1.
 #' @param set.seed If true, seed is set to ensure reproducibility of these results. Default is TRUE.
 #' @param seed if set.seed is TRUE, seed is set to 42.
+#' @param graph.used If using Seurat object by default, Signac uses the nearest neighbor graph in the graphs field of the Seurat object. Other options are "wnn" to use weighted nearest neighbors, as well as "snn" to use shared nearest neighbors.
 #' @return A list of character vectors: cell type annotations (L1, L2, ...) at each level of the hierarchy
 #' as well as 'clusters' for the Louvain clustering results.
 #' @seealso \code{\link{SignacFast}}, a faster alternative that only differs from \code{\link{Signac}} in nuanced T cell phenotypes.
@@ -55,7 +56,7 @@
 #' # save results
 #' saveRDS(pbmc, "example_pbmcs.rds")
 #' }
-Signac <- function(E, R = 'default', spring.dir = NULL, N = 100, num.cores = 1, threshold = 0, smooth = TRUE, impute = TRUE, verbose = TRUE, do.normalize = TRUE, return.probability = FALSE, hidden = 1, set.seed = TRUE, seed = '42')
+Signac <- function(E, R = 'default', spring.dir = NULL, N = 100, num.cores = 1, threshold = 0, smooth = TRUE, impute = TRUE, verbose = TRUE, do.normalize = TRUE, return.probability = FALSE, hidden = 1, set.seed = TRUE, seed = '42', graph.used = "nn")
 {
   if (!is.null(spring.dir))
     spring.dir = gsub("\\/$", "", spring.dir, perl = TRUE)
@@ -67,7 +68,7 @@ Signac <- function(E, R = 'default', spring.dir = NULL, N = 100, num.cores = 1, 
   
   if (flag){
     default.assay <- Seurat::DefaultAssay(E)
-    edges = E@graphs[[which(grepl(paste0(default.assay, "_nn"), names(E@graphs)))]]
+    edges = E@graphs[[which(grepl(paste0("_", graph.used), names(E@graphs)))]]
   }
   
   if (verbose)

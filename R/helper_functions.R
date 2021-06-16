@@ -43,6 +43,7 @@ GetTrainingData_HPCA <- function(){
 #' @param new_populations Character vector specifying any new cell types that were learned by Signac. Default is NULL.
 #' @param new_categories If new_populations are set to a cell type, new_category is a corresponding character vector indicating the population that the new population belongs to. Default is NULL.
 #' @param min.cells If desired, any cell population with equal to or less than N cells is set to "Unclassified." Default is 10 cells.
+#' @param graph.used If using Seurat object by default, Signac uses the nearest neighbor graph in the graphs field of the Seurat object. Other options are "wnn" to use weighted nearest neighbors, as well as "snn" to use shared nearest neighbors.
 #' @return A list of cell type labels for cell types, cell states and novel populations.
 #' @export
 #' @examples
@@ -60,20 +61,13 @@ GetTrainingData_HPCA <- function(){
 #' # run Seurat pipeline
 #' pbmc <- SCTransform(pbmc, verbose = FALSE)
 #' pbmc <- RunPCA(pbmc, verbose = FALSE)
-#' pbmc <- RunUMAP(pbmc, dims = 1:30, verbose = FALSE)
 #' pbmc <- FindNeighbors(pbmc, dims = 1:30, verbose = FALSE)
 #' 
-#' # download bootstrapped reference data for training models
-#' file.dir = "https://github.com/mathewchamberlain/Signac/blob/master/data/"
-#' file = "training_HPCA.rda"
-#' download.file(paste0(file.dir, file, "?raw=true"), destfile = "training_HPCA.rda")
-#' load("training_HPCA.rda")
-#' 
 #' # classify cells
-#' labels = SignacFast(E = pbmc, R = training_HPCA)
+#' labels = SignacFast(E = pbmc)
 #' celltypes = GenerateLabels(labels, E = pbmc)
 #' }
-GenerateLabels = function(cr, E = NULL, smooth = TRUE, new_populations = NULL, new_categories = NULL, min.cells = 10,  spring.dir = NULL)
+GenerateLabels = function(cr, E = NULL, smooth = TRUE, new_populations = NULL, new_categories = NULL, min.cells = 10,  spring.dir = NULL, graph.used = "nn")
 {
   
   # if using SPRING, load data
@@ -86,7 +80,7 @@ GenerateLabels = function(cr, E = NULL, smooth = TRUE, new_populations = NULL, n
   flag = class(E) == "Seurat"
   if (flag) {
     default.assay <- Seurat::DefaultAssay(E)
-    edges = E@graphs[[which(grepl(paste0(default.assay, "_nn"), names(E@graphs)))]]
+    edges = E@graphs[[which(grepl(paste0("_", graph.used), names(E@graphs)))]]
     dM = CID.GetDistMat(edges)
   }
   
@@ -147,7 +141,16 @@ GenerateLabels = function(cr, E = NULL, smooth = TRUE, new_populations = NULL, n
   celltypes[logik] = "Unclassified"
   immune[logik] = "Unclassified"
   
+  # set consistent cell type annotations
+  celltypes[cellstates %in% c("B.memory", "B.naive")] = "B"
+  celltypes[cellstates %in% c("DC", "Mon.Classical", "Mon.NonClassical", "Neutrophils", "Monocytes", "Macrophages")] = "MPh"
+  celltypes[cellstates %in% c("NK", "T.CD4.naive", "T.CD4.memory", "T.regs", "T.CD8.naive", "T.CD8.memory", "T.CD8.cm","T.CD8.em")] = "TNK"
+  celltypes[cellstates %in% c("Endothelial", "Fibroblasts", "Epithelial")] = "NonImmune"
+  immune[cellstates %in% c("Endothelial", "Fibroblasts", "Epithelial")] = "NonImmune"
+  immune[! cellstates %in% c("NonImmune", "Unclassified")] = "Immune"
+  
   res$Immune = immune
+  
   if (!is.null(spring.dir) | flag)
   {
   do = data.frame(table(louvain[cellstates == "Unclassified"]))
@@ -196,7 +199,7 @@ GenerateLabels = function(cr, E = NULL, smooth = TRUE, new_populations = NULL, n
       return(xx)
     })
   }
-
+  
   return(res)
 }
 

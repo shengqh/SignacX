@@ -18,7 +18,8 @@ Signac(
   return.probability = FALSE,
   hidden = 1,
   set.seed = TRUE,
-  seed = "42"
+  seed = "42",
+  graph.used = "nn"
 )
 }
 \arguments{
@@ -49,6 +50,8 @@ Signac(
 \item{set.seed}{If true, seed is set to ensure reproducibility of these results. Default is TRUE.}
 
 \item{seed}{if set.seed is TRUE, seed is set to 42.}
+
+\item{graph.used}{If using Seurat object by default, Signac uses the nearest neighbor graph in the graphs field of the Seurat object. Other options are "wnn" to use weighted nearest neighbors, as well as "snn" to use shared nearest neighbors.}
 }
 \value{
 A list of character vectors: cell type annotations (L1, L2, ...) at each level of the hierarchy

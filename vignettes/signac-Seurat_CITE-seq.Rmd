@@ -63,6 +63,11 @@ pbmc <- CreateSeuratObject(counts = E$`Gene Expression`, project = "pbmc")
 
 # run sctransform
 pbmc <- SCTransform(pbmc)
+
+# optionally just normalize data
+# pbmc <- NormalizeData(pbmc)
+# pbmc <- FindVariableFeatures(pbmc)
+# pbmc <- ScaleData(pbmc)
 ```
 
 Perform dimensionality reduction by PCA and UMAP embedding. Note:
@@ -101,11 +106,11 @@ celltypes = GenerateLabels(labels, E = pbmc)
 Sometimes, training the neural networks takes a lot of time. To make Signac faster, we implemented SignacFast which uses an ensemble of pre-trained neural network models. Note:
 
 * SignacFast uses an ensemble of 1,800 pre-calculated neural networks using the GenerateModels function together with the training_HPCA reference data.
-* Features that are absent from the single cell data and present in the neural network are set to zero.
+* Features that are absent from the single cell data and present in the neural network are imputed as having zero expression.
 
 ```{r SignacFast, message = T, eval = F}
 # Run Signac
-labels_fast <- SignacFast(pbmc)
+labels_fast <- SignacFast(pbmc, num.cores = 12)
 celltypes_fast = GenerateLabels(labels_fast, E = pbmc)
 ```
 

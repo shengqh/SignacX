@@ -61,7 +61,7 @@ SignacFast <- function(E, Models = 'default', spring.dir = NULL, num.cores = 1, 
   
   if (flag){
     default.assay <- Seurat::DefaultAssay(E)
-    edges = E@graphs[[which(grepl(paste0("_", graph.used), names(E@graphs)))]]
+    edges = E@graphs[[which(grepl(paste0(default.assay, "_", graph.used), names(E@graphs)))]]
   }
   
   if (verbose)

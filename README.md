@@ -11,7 +11,7 @@
     <img src="https://github.com/mathewchamberlain/SignacX/blob/master/images/GitHubFigure.svg" alt="Logo" width="600" height="300">
   </a>
 
-  <h3 align="center">SignacX 2.2.0</h3>
+  <h3 align="center">SignacX 2.2.3</h3>
 
   <p align="center">
     Get the most out of your single cell data.
@@ -57,7 +57,7 @@
 <!-- ABOUT THE PROJECT -->
 ## What is SignacX?
 
-SignacX is software developed and maintained by the Savova lab at Sanofi with a focus on single cell genomics for clinical applications. SignacX classifies the cellular phenotype for each individual cell in single cell RNA-sequencing data using neural networks trained with sorted bulk gene expression data from the [Human Primary Cell Atlas](https://bmcgenomics.biomedcentral.com/articles/10.1186/1471-2164-14-632). In this R implementation, we provide functions and vignettes that demonstrate how to: integrate single cell data (mapping cells from one data set to another), classify non-human data, identify novel cell types, and classify single cell data across many tissues, diseases and technologies. To learn more, check out the pre-print [here](https://www.biorxiv.org/content/10.1101/2021.02.01.429207v3.full).
+SignacX is software developed by the Savova lab at Sanofi with a focus on single cell genomics for clinical applications. SignacX classifies the cellular phenotype for each individual cell in single cell RNA-sequencing data using neural networks trained with sorted bulk gene expression data from the [Human Primary Cell Atlas](https://bmcgenomics.biomedcentral.com/articles/10.1186/1471-2164-14-632). In this R implementation, we provide functions and vignettes that demonstrate how to: integrate single cell data (mapping cells from one data set to another), classify non-human data, identify novel cell types, and classify single cell data across many tissues, diseases and technologies. To learn more, check out the pre-print [here](https://www.biorxiv.org/content/10.1101/2021.02.01.429207v3.full).
 
 ## Data portal
 
@@ -94,7 +94,7 @@ To install SignacX in R, simply do:
 ### Installation
 
 ```r
-devtools::install_github("mathewchamberlain/SignacX")
+install.packages("SignacX")
 ```
 
 ### Quick start
@@ -285,7 +285,7 @@ Distributed under the GPL v3.0 License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Mathew Chamberlain - mathew.chamberlain@sanofi.com
+Mathew Chamberlain - chamberlainphd@gmail.com
 
 Project Link: [https://github.com/mathewchamberlain/SignacX](https://github.com/mathewchamberlain/SignacX)
 

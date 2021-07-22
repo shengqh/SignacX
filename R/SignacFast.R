@@ -82,7 +82,8 @@ SignacFast <- function(E, Models = 'default', spring.dir = NULL, num.cores = 1, 
   
   # keep only unique row names
   logik = CID.IsUnique(rownames(E))
-  E = E[logik,]
+  if (sum(logik) != length(logik))
+    E = E[logik,]
   
   # intersect genes with reference set
   gns = sort(unique(unlist(sapply(Models, function(x){ x$genes }))))
@@ -116,12 +117,16 @@ SignacFast <- function(E, Models = 'default', spring.dir = NULL, num.cores = 1, 
   
   # set up imputation matrices
   if (flag) {
-    dM = CID.GetDistMat(edges)
     louvain = CID.Louvain(edges = edges)
+    if (nrow(edges) != ncol(edges)) {
+      edges = CID.GetDistMat(edges, n = 1)
+    } else {
+      edges = list(edges)
+    }
   } else {
     edges = CID.LoadEdges(data.dir = spring.dir)
-    dM = CID.GetDistMat(edges)
     louvain = CID.Louvain(edges = edges)
+    edges = CID.GetDistMat(edges, n = 1)
   }
   res = pbmcapply::pbmclapply(Models, FUN = function(x){
     
@@ -129,7 +134,7 @@ SignacFast <- function(E, Models = 'default', spring.dir = NULL, num.cores = 1, 
     
     # run imputation (if desired)
     if (impute){
-      Z = KSoftImpute(E = Z, dM = dM, verbose = FALSE)
+      Z = KSoftImpute(E = Z, dM = edges, verbose = FALSE)
       Z = t(apply(Z, 1, function(x){
         normalize(x)
       }))
@@ -161,7 +166,7 @@ SignacFast <- function(E, Models = 'default', spring.dir = NULL, num.cores = 1, 
     
     # smooth the output classifications
     if (smooth & any(as.character(unique(x$celltypes)) %in% c("Immune", "Myeloid", "NonImmune", "Lymphocytes", "Monocytes.Neutrophils", "Monocytes", "Fibroblasts", "Epithelial")))
-      df$celltypes = CID.smooth(df$celltypes, dM[[1]])
+      df$celltypes = CID.smooth(df$celltypes, edges[[1]])
     
     # return probabilities and cell type classifications
     if (return.probability){

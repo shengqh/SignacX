@@ -73,7 +73,7 @@ GenerateLabels = function(cr, E = NULL, smooth = TRUE, new_populations = NULL, n
   # if using SPRING, load data
   if (!is.null(spring.dir)){
     edges = CID.LoadEdges(data.dir = spring.dir)
-    dM = CID.GetDistMat(edges)
+    edges = CID.GetDistMat(edges)
   }
   
   # check for Seurat object
@@ -81,7 +81,11 @@ GenerateLabels = function(cr, E = NULL, smooth = TRUE, new_populations = NULL, n
   if (flag) {
     default.assay <- Seurat::DefaultAssay(E)
     edges = E@graphs[[which(grepl(paste0("_", graph.used), names(E@graphs)))]]
-    dM = CID.GetDistMat(edges)
+    if (ncol(edges) > 100000) {
+      edges = list(edges)
+    } else {
+      edges = CID.GetDistMat(edges)
+    }
   }
   
   # remove louvain clusters
@@ -127,12 +131,12 @@ GenerateLabels = function(cr, E = NULL, smooth = TRUE, new_populations = NULL, n
   
   # assign Unclassifieds
   if (!is.null(spring.dir) | flag){
-  celltypes = CID.entropy(celltypes, dM)
-  immune = CID.entropy(immune, dM)
+  celltypes = CID.entropy(celltypes, edges)
+  immune = CID.entropy(immune, edges)
   # smooth 
   if (smooth) {
-    celltypes= CID.smooth(celltypes, dM[[1]])
-    immune = CID.smooth(immune, dM[[1]])
+    celltypes= CID.smooth(celltypes, edges[[1]])
+    immune = CID.smooth(immune, edges[[1]])
   }
   }
   # set consistent unclassified cells

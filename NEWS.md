@@ -1,3 +1,7 @@
+# SignacX 2.2.4 (2021-07-20) 
+
+Enabled SignacX to classify datasets >300,000 cells -- fixed a memory allocation issue. First degree nearest KNN neighbors are now used for Shannon entropy calculation for datasets > 100,000 cells. 
+
 # SignacX 2.2.3 (2021-07-16) 
 
 Fixed a typo in the help section for SignacX::MASC. 

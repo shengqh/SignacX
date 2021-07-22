@@ -1,6 +1,6 @@
 Package: SignacX
-Version: 2.2.3
-Date: 2021-07-16
+Version: 2.2.4
+Date: 2021-07-20
 Title: Cell Type Identification and Discovery from Single Cell Gene
         Expression Data
 Authors@R: c(
@@ -25,7 +25,7 @@ LazyData: true
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2021-07-16 06:36:47 UTC; ubuntu
+Packaged: 2021-07-20 18:56:41 UTC; ubuntu
 Author: Mathew Chamberlain [aut, cre],
   Virginia Savova [aut],
   Richa Hanamsagar [aut],
@@ -33,4 +33,4 @@ Author: Mathew Chamberlain [aut, cre],
   Emanuele de Rinaldis [aut],
   Sanofi US [fnd]
 Repository: CRAN
-Date/Publication: 2021-07-16 06:50:02 UTC
+Date/Publication: 2021-07-22 07:40:09 UTC

@@ -1,3 +1,7 @@
+# SignacX 2.2.5 (2021-11-17)
+
+Fixed issues with rhdf5 library that caused problems hosting SignacX on CRAN. Previously, SignacX looked to import an s3 method from rhdf5, which was changed to an importable method for saving hdf5 files.
+
 # SignacX 2.2.4 (2021-07-20) 
 
 Enabled SignacX to classify datasets >300,000 cells -- fixed a memory allocation issue. First degree nearest KNN neighbors are now used for Shannon entropy calculation for datasets > 100,000 cells. 

@@ -752,7 +752,7 @@ CID.IsUnique <- function (x)
 #' @importClassesFrom Matrix dgCMatrix
 #' @return matrix.h5 file, where each is background corrected
 #' @export
-#' @importFrom rhdf5 h5createFile h5createGroup h5write h5write.default
+#' @importFrom rhdf5 h5createFile h5createGroup h5write
 #' @examples
 #' \dontrun{
 #' # download single cell data for classification
@@ -814,19 +814,19 @@ SaveCountsToH5 <- function(D, data.dir, genome = "GRCh38")
       fn = paste(y, fn, sep = "/")
       rhdf5::h5createFile(fn)
       rhdf5::h5createGroup(fn, genome)
-      rhdf5::h5write.default(x@Dimnames[[2]], file = fn, name = paste0(genome, "/barcodes"))
+      rhdf5::h5write(x@Dimnames[[2]], file = fn, name = paste0(genome, "/barcodes"))
       if (flag)
       {
-        rhdf5::h5write.default(genes, file = fn, name=paste0(genome, "/genes"))
-        rhdf5::h5write.default(gene_names, file = fn, name=paste0(genome, "/gene_names"))
+        rhdf5::h5write(genes, file = fn, name=paste0(genome, "/genes"))
+        rhdf5::h5write(gene_names, file = fn, name=paste0(genome, "/gene_names"))
       } else {
-        rhdf5::h5write.default(x@Dimnames[[1]], file = fn, name=paste0(genome, "/genes"))
-        rhdf5::h5write.default(x@Dimnames[[1]], file = fn, name=paste0(genome, "/gene_names"))
+        rhdf5::h5write(x@Dimnames[[1]], file = fn, name=paste0(genome, "/genes"))
+        rhdf5::h5write(x@Dimnames[[1]], file = fn, name=paste0(genome, "/gene_names"))
       }
-      rhdf5::h5write.default(x@x, file = fn, name=paste0(genome, "/data"))
-      rhdf5::h5write.default(dim(x), file = fn, name=paste0(genome, "/shape"))
-      rhdf5::h5write.default(x@i, file = fn, name=paste0(genome, "/indices")) # already zero-indexed.
-      rhdf5::h5write.default(x@p, file = fn, name=paste0(genome, "/indptr"))
+      rhdf5::h5write(x@x, file = fn, name=paste0(genome, "/data"))
+      rhdf5::h5write(dim(x), file = fn, name=paste0(genome, "/shape"))
+      rhdf5::h5write(x@i, file = fn, name=paste0(genome, "/indices")) # already zero-indexed.
+      rhdf5::h5write(x@p, file = fn, name=paste0(genome, "/indptr"))
     }, x = D, y = data.dirs)
   )
   rhdf5::h5closeAll()

@@ -94,7 +94,12 @@ Signac <- function(E, R = 'default', spring.dir = NULL, N = 100, num.cores = 1, 
   
   # intersect genes with reference set
   gns = intersect(rownames(E), R$genes)
-  V = E[rownames(E) %in% gns, ]
+  if(flag){
+    V=E@assays[[default.assay]]@counts
+    V = V[rownames(V) %in% gns, ]
+  }else{
+    V = E[rownames(E) %in% gns, ]
+  }
   
   if (class(V) %in% "data.frame")
     V = Matrix::Matrix(as.matrix(V), sparse = TRUE)
@@ -102,12 +107,8 @@ Signac <- function(E, R = 'default', spring.dir = NULL, N = 100, num.cores = 1, 
   # normalize to the mean library size
   if (do.normalize)
   {
-    if (!flag)
-    {
-      V = CID.Normalize(V)
-    } else {
-      V = CID.Normalize(V@assays[[default.assay]]@counts)
-    }
+    #V has been convert to matrix for Seurat object
+    V = CID.Normalize(V)
   }
   
   # normalization function for gene expression scaling
